@@ -4,6 +4,7 @@ import { useSettings } from "@/lib/settings-provider";
 import { useState, useEffect, useCallback } from "react";
 import { WeatherService } from "@/services/weather";
 import { WeatherData } from "@/types/weather";
+import { AltitudeWindCard } from "@/components/altitude-wind-card";
 import * as Location from "expo-location";
 import * as Haptics from "expo-haptics";
 import {
@@ -269,6 +270,9 @@ export default function HomeScreen() {
               </View>
             </ScrollView>
           </View>
+
+          {/* Wind at Altitude */}
+          <AltitudeWindCard groundWindSpeed={displayWindSpeed} settings={settings} />
 
           {/* Sun Times */}
           <View className="bg-surface rounded-2xl p-4 border border-border">
