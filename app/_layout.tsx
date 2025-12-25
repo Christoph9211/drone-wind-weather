@@ -9,6 +9,7 @@ import { Platform } from "react-native";
 import "@/lib/_core/nativewind-pressable";
 import { ThemeProvider } from "@/lib/theme-provider";
 import { SettingsProvider } from "@/lib/settings-provider";
+import { LocationProvider } from "@/lib/location-provider";
 import {
   SafeAreaFrameContext,
   SafeAreaInsetsContext,
@@ -101,13 +102,15 @@ export default function RootLayout() {
     return (
       <ThemeProvider>
         <SettingsProvider>
-          <SafeAreaProvider initialMetrics={providerInitialMetrics}>
-            <SafeAreaFrameContext.Provider value={frame}>
-              <SafeAreaInsetsContext.Provider value={insets}>
-                {content}
-              </SafeAreaInsetsContext.Provider>
-            </SafeAreaFrameContext.Provider>
-          </SafeAreaProvider>
+          <LocationProvider>
+            <SafeAreaProvider initialMetrics={providerInitialMetrics}>
+              <SafeAreaFrameContext.Provider value={frame}>
+                <SafeAreaInsetsContext.Provider value={insets}>
+                  {content}
+                </SafeAreaInsetsContext.Provider>
+              </SafeAreaFrameContext.Provider>
+            </SafeAreaProvider>
+          </LocationProvider>
         </SettingsProvider>
       </ThemeProvider>
     );
@@ -116,7 +119,9 @@ export default function RootLayout() {
   return (
     <ThemeProvider>
       <SettingsProvider>
-        <SafeAreaProvider initialMetrics={providerInitialMetrics}>{content}</SafeAreaProvider>
+        <LocationProvider>
+          <SafeAreaProvider initialMetrics={providerInitialMetrics}>{content}</SafeAreaProvider>
+        </LocationProvider>
       </SettingsProvider>
     </ThemeProvider>
   );

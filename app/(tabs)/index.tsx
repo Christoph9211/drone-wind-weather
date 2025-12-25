@@ -5,6 +5,9 @@ import { useState, useEffect, useCallback } from "react";
 import { WeatherService } from "@/services/weather";
 import { WeatherData } from "@/types/weather";
 import { AltitudeWindCard } from "@/components/altitude-wind-card";
+import { LocationSearchModal } from "@/components/location-search-modal";
+import { useLocation } from "@/lib/location-provider";
+import { LocationSearchResult } from "@/services/location-search";
 import * as Location from "expo-location";
 import * as Haptics from "expo-haptics";
 import {
@@ -22,15 +25,17 @@ const WEATHER_CACHE_KEY = '@dronewind_weather_cache';
 
 export default function HomeScreen() {
   const { settings } = useSettings();
+  const { currentLocation, setCurrentLocation, useGPS } = useLocation();
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [locationPermission, setLocationPermission] = useState(false);
+  const [searchModalVisible, setSearchModalVisible] = useState(false);
 
   useEffect(() => {
     initializeWeather();
-  }, []);
+  }, [useGPS, currentLocation]);
 
   const initializeWeather = async () => {
     try {
@@ -94,6 +99,19 @@ export default function HomeScreen() {
       console.error('Error loading cached weather:', err);
     }
     return null;
+  };
+
+  const handleLocationSelect = async (location: LocationSearchResult) => {
+    try {
+      await setCurrentLocation(location);
+      setLoading(true);
+      await fetchWeatherDataForLocation(location.latitude, location.longitude);
+    } catch (err) {
+      console.error('Error selecting location:', err);
+      setError('Failed to load weather for selected location');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const onRefresh = useCallback(async () => {
@@ -168,8 +186,14 @@ export default function HomeScreen() {
         }
       >
         <View className="flex-1 gap-6">
-          {/* Location Header */}
+          {/* Location Header with Search */}
           <View className="items-center">
+            <TouchableOpacity
+              onPress={() => setSearchModalVisible(true)}
+              className="mb-3 px-4 py-2 bg-surface rounded-full border border-border active:bg-primary/10"
+            >
+              <Text className="text-sm text-primary font-semibold">🔍 Change Location</Text>
+            </TouchableOpacity>
             <Text className="text-2xl font-bold text-foreground">{weatherData.location.name}</Text>
             <Text className="text-sm text-muted mt-1">{weatherData.current.weatherDescription}</Text>
           </View>
@@ -305,6 +329,13 @@ export default function HomeScreen() {
           )}
         </View>
       </ScrollView>
+      
+      {/* Location Search Modal */}
+      <LocationSearchModal
+        visible={searchModalVisible}
+        onClose={() => setSearchModalVisible(false)}
+        onSelectLocation={handleLocationSelect}
+      />
     </ScreenContainer>
   );
 }

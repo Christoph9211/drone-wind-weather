@@ -62,3 +62,13 @@
 - [x] Debug altitude wind card UI visibility on home screen
 - [x] Verify component rendering and styling
 - [x] Test on different screen sizes
+
+## Location Search Feature
+- [x] Create location search service using geocoding API
+- [x] Build location search input component
+- [x] Add search results display with city/address suggestions
+- [x] Implement location selection and storage
+- [x] Add location history for quick access
+- [x] Integrate search into home screen header
+- [x] Allow toggling between GPS and manual search
+- [x] Test location search with various queries
