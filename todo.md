@@ -84,3 +84,14 @@
 - [x] Implement real-time wind data updates on map
 - [x] Add wind map to tab navigation
 - [x] Test map rendering and animations on different devices
+
+## Wind Forecast Timeline Feature
+- [x] Create forecast timeline component with hourly wind data
+- [x] Implement wind speed chart visualization
+- [x] Add wind direction timeline display
+- [x] Create animated timeline scrubber
+- [ ] Integrate forecast data into wind map
+- [x] Add time selection controls
+- [x] Implement forecast data caching
+- [ ] Add forecast accuracy indicator
+- [x] Test timeline with different forecast ranges

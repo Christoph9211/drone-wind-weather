@@ -7,7 +7,10 @@ import { WeatherData } from "@/types/weather";
 import { AltitudeWindCard } from "@/components/altitude-wind-card";
 import { LocationSearchModal } from "@/components/location-search-modal";
 import { useLocation } from "@/lib/location-provider";
+import { useForecast } from "@/lib/forecast-provider";
+import { WindForecastTimeline } from "@/components/wind-forecast-timeline";
 import { LocationSearchResult } from "@/services/location-search";
+import { TimelineSelection } from "@/types/forecast";
 import * as Location from "expo-location";
 import * as Haptics from "expo-haptics";
 import {
@@ -26,6 +29,7 @@ const WEATHER_CACHE_KEY = '@dronewind_weather_cache';
 export default function HomeScreen() {
   const { settings } = useSettings();
   const { currentLocation, setCurrentLocation, useGPS } = useLocation();
+  const { forecast, loading: forecastLoading, selectedHour, setSelectedHour: setForecastSelectedHour, refreshForecast } = useForecast();
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -80,6 +84,8 @@ export default function HomeScreen() {
       const data = await WeatherService.getWeatherData(lat, lon, units);
       setWeatherData(data);
       setError(null);
+      // Refresh forecast for this location
+      await refreshForecast(lat, lon);
       
       // Cache the data
       await AsyncStorage.setItem(WEATHER_CACHE_KEY, JSON.stringify(data));
@@ -111,7 +117,12 @@ export default function HomeScreen() {
       setError('Failed to load weather for selected location');
     } finally {
       setLoading(false);
+      setSearchModalVisible(false);
     }
+  };
+
+  const handleForecastHourSelect = (selection: TimelineSelection) => {
+    setForecastSelectedHour(selection);
   };
 
   const onRefresh = useCallback(async () => {
@@ -128,6 +139,8 @@ export default function HomeScreen() {
     
     setRefreshing(false);
   }, [locationPermission, weatherData]);
+
+  const displayForecast = forecast && !forecastLoading;
 
   if (loading) {
     return (
@@ -297,6 +310,19 @@ export default function HomeScreen() {
 
           {/* Wind at Altitude */}
           <AltitudeWindCard groundWindSpeed={displayWindSpeed} settings={settings} />
+
+          {/* Wind Forecast Timeline */}
+          {displayForecast && (
+            <WindForecastTimeline
+              forecast={forecast}
+              loading={forecastLoading}
+              selectedHour={selectedHour}
+              onHourSelect={handleForecastHourSelect}
+              safeThreshold={settings.thresholds.safe}
+              cautionThreshold={settings.thresholds.caution}
+              windUnit={settings.units.wind}
+            />
+          )}
 
           {/* Sun Times */}
           <View className="bg-surface rounded-2xl p-4 border border-border">

@@ -10,6 +10,7 @@ import "@/lib/_core/nativewind-pressable";
 import { ThemeProvider } from "@/lib/theme-provider";
 import { SettingsProvider } from "@/lib/settings-provider";
 import { LocationProvider } from "@/lib/location-provider";
+import { ForecastProvider } from "@/lib/forecast-provider";
 import {
   SafeAreaFrameContext,
   SafeAreaInsetsContext,
@@ -103,13 +104,15 @@ export default function RootLayout() {
       <ThemeProvider>
         <SettingsProvider>
           <LocationProvider>
-            <SafeAreaProvider initialMetrics={providerInitialMetrics}>
-              <SafeAreaFrameContext.Provider value={frame}>
-                <SafeAreaInsetsContext.Provider value={insets}>
-                  {content}
-                </SafeAreaInsetsContext.Provider>
-              </SafeAreaFrameContext.Provider>
-            </SafeAreaProvider>
+            <ForecastProvider>
+              <SafeAreaProvider initialMetrics={providerInitialMetrics}>
+                <SafeAreaFrameContext.Provider value={frame}>
+                  <SafeAreaInsetsContext.Provider value={insets}>
+                    {content}
+                  </SafeAreaInsetsContext.Provider>
+                </SafeAreaFrameContext.Provider>
+              </SafeAreaProvider>
+            </ForecastProvider>
           </LocationProvider>
         </SettingsProvider>
       </ThemeProvider>
@@ -120,7 +123,9 @@ export default function RootLayout() {
     <ThemeProvider>
       <SettingsProvider>
         <LocationProvider>
-          <SafeAreaProvider initialMetrics={providerInitialMetrics}>{content}</SafeAreaProvider>
+          <ForecastProvider>
+            <SafeAreaProvider initialMetrics={providerInitialMetrics}>{content}</SafeAreaProvider>
+          </ForecastProvider>
         </LocationProvider>
       </SettingsProvider>
     </ThemeProvider>
