@@ -1,4 +1,4 @@
-import { View, Text, ActivityIndicator, Platform, ScrollView } from 'react-native';
+import { View, Text, ActivityIndicator, Platform, TouchableOpacity } from 'react-native';
 import { useState, useEffect, useRef } from 'react';
 import { ScreenContainer } from '@/components/screen-container';
 import { useLocation } from '@/lib/location-provider';
@@ -13,12 +13,12 @@ import {
   getWindSpeedCategory,
   Particle,
 } from '@/lib/wind-particle-system';
-import { formatWindSpeed } from '@/lib/weather-utils';
+import { formatWindSpeed, degreesToCompass, getFlightCondition } from '@/lib/weather-utils';
+import * as Haptics from 'expo-haptics';
 
 import { WindMapCanvasWeb } from '@/components/wind-map-canvas-web';
 import { WindMapCanvasNative } from '@/components/wind-map-canvas-native';
 
-// For web, we'll use Canvas API; for native, we'll use a custom canvas view
 const MapCanvas = Platform.select({
   web: WindMapCanvasWeb,
   default: WindMapCanvasNative,
@@ -31,10 +31,10 @@ export default function WindMapScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [particles, setParticles] = useState<Particle[]>([]);
+  const [showDetails, setShowDetails] = useState(true);
   const animationRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastUpdateRef = useRef<number>(Date.now());
 
-  // Load weather data for current location
   useEffect(() => {
     loadWeatherData();
   }, [currentLocation]);
@@ -57,8 +57,6 @@ export default function WindMapScreen() {
 
       setWeatherData(data);
       setError(null);
-
-      // Initialize particles
       initializeParticles(data);
     } catch (err) {
       console.error('Error loading weather data:', err);
@@ -71,24 +69,22 @@ export default function WindMapScreen() {
   const initializeParticles = (data: WeatherData) => {
     const { vx, vy } = windDirectionToVelocity(
       data.current.windDirection,
-      data.current.windSpeed / 10 // Scale down for visualization
+      data.current.windSpeed / 8
     );
 
-    // Generate particles across the map
     const newParticles = generateParticles(
-      150, // number of particles
-      512, // center x (canvas width / 2)
-      384, // center y (canvas height / 2)
-      200, // radius
+      200,
+      512,
+      384,
+      280,
       vx,
       vy,
-      2500 // lifetime in ms
+      3000
     );
 
     setParticles(newParticles);
   };
 
-  // Animation loop for particles
   useEffect(() => {
     if (!weatherData) return;
 
@@ -100,21 +96,20 @@ export default function WindMapScreen() {
       setParticles((prevParticles) => {
         const updated = updateParticles(prevParticles, deltaTime);
 
-        // Regenerate particles if count drops below threshold
-        if (updated.length < 50) {
+        if (updated.length < 80) {
           const { vx, vy } = windDirectionToVelocity(
             weatherData.current.windDirection,
-            weatherData.current.windSpeed / 10
+            weatherData.current.windSpeed / 8
           );
 
           const newParticles = generateParticles(
-            50,
+            60,
             512,
             384,
-            200,
+            280,
             vx,
             vy,
-            2500
+            3000
           );
 
           return [...updated, ...newParticles];
@@ -123,7 +118,7 @@ export default function WindMapScreen() {
         return updated;
       });
 
-      animationRef.current = setTimeout(animate, 16) as any; // ~60fps
+      animationRef.current = setTimeout(animate, 16) as any;
     };
 
     animationRef.current = setTimeout(animate, 16) as any;
@@ -135,20 +130,33 @@ export default function WindMapScreen() {
     };
   }, [weatherData]);
 
+  const toggleDetails = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setShowDetails(!showDetails);
+  };
+
   if (loading) {
     return (
-      <ScreenContainer className="justify-center items-center">
-        <ActivityIndicator size="large" color="#0a7ea4" />
-        <Text className="text-muted mt-3">Loading wind map...</Text>
+      <ScreenContainer className="justify-center items-center bg-[#0f172a]">
+        <ActivityIndicator size="large" color="#10b981" />
+        <Text className="text-slate-400 mt-4 text-sm">Loading wind map...</Text>
       </ScreenContainer>
     );
   }
 
   if (error || !weatherData) {
     return (
-      <ScreenContainer className="justify-center items-center p-6">
-        <Text className="text-error text-lg font-semibold mb-2">⚠️ Error</Text>
-        <Text className="text-muted text-center">{error || 'No weather data available'}</Text>
+      <ScreenContainer className="justify-center items-center p-6 bg-[#0f172a]">
+        <Text className="text-red-400 text-lg font-semibold mb-2">Unable to Load</Text>
+        <Text className="text-slate-400 text-center text-sm">{error || 'No weather data available'}</Text>
+        <TouchableOpacity
+          onPress={loadWeatherData}
+          className="mt-4 bg-emerald-600 px-6 py-3 rounded-full active:opacity-80"
+        >
+          <Text className="text-white font-semibold">Retry</Text>
+        </TouchableOpacity>
       </ScreenContainer>
     );
   }
@@ -159,54 +167,119 @@ export default function WindMapScreen() {
     settings.thresholds.safe,
     settings.thresholds.caution
   );
+  const flightCondition = getFlightCondition(weatherData.current.windSpeed, settings.thresholds);
+  const windDirection = degreesToCompass(weatherData.current.windDirection);
+
+  const statusColors = {
+    safe: { bg: 'bg-emerald-500/20', border: 'border-emerald-500/40', text: 'text-emerald-400' },
+    caution: { bg: 'bg-amber-500/20', border: 'border-amber-500/40', text: 'text-amber-400' },
+    unsafe: { bg: 'bg-red-500/20', border: 'border-red-500/40', text: 'text-red-400' },
+  };
+
+  const status = statusColors[windCategory];
 
   return (
-    <ScreenContainer>
+    <ScreenContainer containerClassName="bg-[#0f172a]">
       <View className="flex-1">
         {/* Map Canvas */}
-        <View className="flex-1 bg-background rounded-2xl overflow-hidden border border-border">
+        <View className="flex-1 overflow-hidden">
           <MapCanvas
             particles={particles}
             windSpeed={weatherData.current.windSpeed}
             windDirection={weatherData.current.windDirection}
             windCategory={windCategory}
+            safeThreshold={settings.thresholds.safe}
+            cautionThreshold={settings.thresholds.caution}
           />
         </View>
 
-        {/* Wind Info Overlay */}
-        <View className="absolute top-4 left-4 right-4 bg-surface/95 rounded-lg p-3 border border-border">
-          <Text className="text-sm text-muted">Wind Speed at {currentLocation?.name}</Text>
-          <View className="flex-row items-baseline gap-2 mt-1">
-            <Text className="text-3xl font-bold" style={{ color: windColor }}>
-              {formatWindSpeed(weatherData.current.windSpeed, settings.units.wind)}
-            </Text>
-            <Text className="text-lg font-semibold text-foreground">
-              {settings.units.wind}
-            </Text>
-          </View>
-          <Text className="text-xs text-muted mt-2">
-            Direction: {Math.round(weatherData.current.windDirection)}° | Gusts: {formatWindSpeed(weatherData.current.windGust, settings.units.wind)} {settings.units.wind}
-          </Text>
-        </View>
+        {/* Top Info Bar */}
+        {showDetails && (
+          <View className="absolute top-3 left-3 right-3">
+            <View className="bg-slate-900/95 rounded-xl border border-slate-700/50 overflow-hidden">
+              {/* Location Header */}
+              <View className="px-4 py-3 border-b border-slate-700/50">
+                <View className="flex-row items-center justify-between">
+                  <View className="flex-1">
+                    <Text className="text-slate-400 text-xs uppercase tracking-wider">Current Location</Text>
+                    <Text className="text-white font-semibold text-base mt-0.5" numberOfLines={1}>
+                      {currentLocation?.name || 'Unknown'}
+                    </Text>
+                  </View>
+                  <View className={`px-3 py-1.5 rounded-full ${status.bg} border ${status.border}`}>
+                    <Text className={`text-xs font-bold uppercase ${status.text}`}>
+                      {flightCondition.status}
+                    </Text>
+                  </View>
+                </View>
+              </View>
 
-        {/* Legend */}
-        <View className="absolute bottom-4 left-4 right-4 bg-surface/95 rounded-lg p-3 border border-border">
-          <Text className="text-xs font-semibold text-foreground mb-2">Wind Status</Text>
-          <View className="gap-1">
-            <View className="flex-row items-center gap-2">
-              <View className="w-3 h-3 rounded-full" style={{ backgroundColor: 'rgba(34, 197, 94, 0.8)' }} />
-              <Text className="text-xs text-muted">Safe (≤{settings.thresholds.safe} {settings.units.wind})</Text>
-            </View>
-            <View className="flex-row items-center gap-2">
-              <View className="w-3 h-3 rounded-full" style={{ backgroundColor: 'rgba(245, 158, 11, 0.8)' }} />
-              <Text className="text-xs text-muted">Caution ({settings.thresholds.safe}-{settings.thresholds.caution} {settings.units.wind})</Text>
-            </View>
-            <View className="flex-row items-center gap-2">
-              <View className="w-3 h-3 rounded-full" style={{ backgroundColor: 'rgba(239, 68, 68, 0.8)' }} />
-              <Text className="text-xs text-muted">Unsafe ({'>='}{settings.thresholds.caution} {settings.units.wind})</Text>
+              {/* Wind Stats */}
+              <View className="flex-row">
+                <View className="flex-1 px-4 py-3 border-r border-slate-700/50">
+                  <Text className="text-slate-500 text-xs uppercase tracking-wider">Wind Speed</Text>
+                  <View className="flex-row items-baseline mt-1">
+                    <Text className="text-2xl font-bold" style={{ color: windColor }}>
+                      {Math.round(weatherData.current.windSpeed)}
+                    </Text>
+                    <Text className="text-slate-400 text-sm ml-1">{settings.units.wind}</Text>
+                  </View>
+                </View>
+                <View className="flex-1 px-4 py-3 border-r border-slate-700/50">
+                  <Text className="text-slate-500 text-xs uppercase tracking-wider">Gusts</Text>
+                  <View className="flex-row items-baseline mt-1">
+                    <Text className="text-2xl font-bold text-slate-200">
+                      {Math.round(weatherData.current.windGust)}
+                    </Text>
+                    <Text className="text-slate-400 text-sm ml-1">{settings.units.wind}</Text>
+                  </View>
+                </View>
+                <View className="flex-1 px-4 py-3">
+                  <Text className="text-slate-500 text-xs uppercase tracking-wider">Direction</Text>
+                  <View className="flex-row items-baseline mt-1">
+                    <Text className="text-2xl font-bold text-slate-200">{windDirection}</Text>
+                    <Text className="text-slate-400 text-sm ml-1">{weatherData.current.windDirection}°</Text>
+                  </View>
+                </View>
+              </View>
             </View>
           </View>
-        </View>
+        )}
+
+        {/* Bottom Legend */}
+        {showDetails && (
+          <View className="absolute bottom-3 left-3 right-3">
+            <View className="bg-slate-900/95 rounded-xl border border-slate-700/50 px-4 py-3">
+              <View className="flex-row items-center justify-between">
+                <View className="flex-row items-center gap-4">
+                  <View className="flex-row items-center gap-2">
+                    <View className="w-3 h-3 rounded-full bg-emerald-500" />
+                    <Text className="text-slate-400 text-xs">Safe ≤{settings.thresholds.safe}</Text>
+                  </View>
+                  <View className="flex-row items-center gap-2">
+                    <View className="w-3 h-3 rounded-full bg-amber-500" />
+                    <Text className="text-slate-400 text-xs">Caution</Text>
+                  </View>
+                  <View className="flex-row items-center gap-2">
+                    <View className="w-3 h-3 rounded-full bg-red-500" />
+                    <Text className="text-slate-400 text-xs">Unsafe ≥{settings.thresholds.caution}</Text>
+                  </View>
+                </View>
+                <Text className="text-slate-500 text-xs">
+                  Updated {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </Text>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {/* Toggle Details Button */}
+        <TouchableOpacity
+          onPress={toggleDetails}
+          className="absolute top-3 right-3 w-10 h-10 bg-slate-800/90 rounded-full items-center justify-center border border-slate-700/50 active:opacity-70"
+        >
+          <Text className="text-white text-lg">{showDetails ? '−' : '+'}</Text>
+        </TouchableOpacity>
       </View>
     </ScreenContainer>
   );
