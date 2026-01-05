@@ -19,6 +19,7 @@ const MAPPING = {
   "chevron.left.forwardslash.chevron.right": "code",
   "chevron.right": "chevron-right",
   "wind": "air",
+  "map": "map",
   "gear": "settings",
 } as IconMapping;
 

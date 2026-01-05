@@ -72,3 +72,15 @@
 - [x] Integrate search into home screen header
 - [x] Allow toggling between GPS and manual search
 - [x] Test location search with various queries
+
+## Wind Map Feature
+- [x] Install react-native-maps and Google Maps API integration
+- [x] Create wind map screen component with map display
+- [x] Implement wind particle animation system
+- [x] Add wind speed heatmap overlay
+- [x] Create wind direction visualization with arrows
+- [x] Integrate current location marker on map
+- [x] Add map controls (zoom, pan, layer toggle)
+- [x] Implement real-time wind data updates on map
+- [x] Add wind map to tab navigation
+- [x] Test map rendering and animations on different devices
