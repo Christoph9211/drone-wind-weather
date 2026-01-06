@@ -39,10 +39,24 @@ export default function HomeScreen() {
 
   useEffect(() => {
     initializeWeather();
-  }, [useGPS, currentLocation]);
+  }, [useGPS]);
+
+  // Fetch weather when current location changes (user selects new location)
+  useEffect(() => {
+    if (currentLocation) {
+      fetchWeatherDataForLocation(currentLocation.latitude, currentLocation.longitude);
+    }
+  }, [currentLocation]);
 
   const initializeWeather = async () => {
     try {
+      // Check if we have a saved location from previous session
+      if (currentLocation) {
+        await fetchWeatherDataForLocation(currentLocation.latitude, currentLocation.longitude);
+        setLoading(false);
+        return;
+      }
+
       // Check location permission
       const { status } = await Location.requestForegroundPermissionsAsync();
       setLocationPermission(status === 'granted');
@@ -69,6 +83,7 @@ export default function HomeScreen() {
 
   const fetchWeatherData = async () => {
     try {
+      setLoading(true);
       const location = await Location.getCurrentPositionAsync({});
       await fetchWeatherDataForLocation(location.coords.latitude, location.coords.longitude);
     } catch (err) {

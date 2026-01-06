@@ -106,3 +106,10 @@
 - [ ] Add map zoom and pan controls
 - [x] Implement smooth transitions and animations
 - [x] Add professional typography and spacing
+
+## Persistent Location Memory
+- [x] Save last selected location to AsyncStorage
+- [x] Load last location on app startup
+- [x] Automatically fetch weather for saved location
+- [x] Show loading state while fetching saved location
+- [x] Allow user to clear saved location preference
