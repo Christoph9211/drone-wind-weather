@@ -113,3 +113,15 @@
 - [x] Automatically fetch weather for saved location
 - [x] Show loading state while fetching saved location
 - [x] Allow user to clear saved location preference
+
+## Wind Map Overlay Testing
+- [x] Write tests for particle system generation and updates
+- [x] Test wind direction to velocity conversion
+- [x] Test wind speed color coding logic
+- [ ] Test canvas rendering functions (requires canvas mocking)
+- [ ] Test wind flow field visualization (requires canvas mocking)
+- [ ] Test compass/direction indicator rendering (requires canvas mocking)
+- [ ] Test location marker rendering (requires canvas mocking)
+- [ ] Test wind speed scale bar rendering (requires canvas mocking)
+- [ ] Test particle trail rendering (requires canvas mocking)
+- [x] Verify all tests pass (76 tests passing)
