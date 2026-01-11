@@ -57,7 +57,7 @@ export function WindMapCanvasWeb({
   cautionThreshold = 25,
 }: WindMapCanvasWebProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationFrameRef = useRef<number>(0);
+  const animationFrameRef = useRef<number | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -76,37 +76,49 @@ export function WindMapCanvasWeb({
     const width = rect.width;
     const height = rect.height;
 
-    // Draw background gradient
-    drawBackground(ctx, width, height);
+    const render = () => {
+      // Draw background gradient
+      drawBackground(ctx, width, height);
 
-    // Draw professional grid
-    drawProfessionalGrid(ctx, width, height);
+      // Draw professional grid
+      drawProfessionalGrid(ctx, width, height);
 
-    // Draw wind flow field
-    drawWindFlowField(ctx, width, height, windDirection, windCategory);
+      // Draw wind flow field
+      drawWindFlowField(ctx, width, height, windDirection, windCategory);
 
-    // Draw particles with trails
-    drawProfessionalParticles(ctx, particles, windCategory, width, height);
+      // Draw particles with trails
+      drawProfessionalParticles(ctx, particles, windCategory, width, height);
 
-    // Draw center location marker with pulse
-    drawProfessionalLocationMarker(ctx, width / 2, height / 2, windCategory);
+      // Draw center location marker with pulse
+      drawProfessionalLocationMarker(ctx, width / 2, height / 2, windCategory);
 
-    // Draw professional compass
-    drawProfessionalCompass(ctx, width - 70, 70, windDirection, windSpeed, windCategory);
+      // Draw professional compass
+      drawProfessionalCompass(ctx, width - 70, 70, windDirection, windSpeed, windCategory);
 
-    // Draw wind speed scale bar
-    drawWindSpeedScale(ctx, 20, height - 120, safeThreshold, cautionThreshold);
+      // Draw wind speed scale bar
+      drawWindSpeedScale(ctx, 20, height - 120, safeThreshold, cautionThreshold);
 
+      animationFrameRef.current = requestAnimationFrame(render);
+    };
+
+    render();
+
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
   }, [particles, windDirection, windSpeed, windCategory, safeThreshold, cautionThreshold]);
 
   return (
-    <View className="flex-1">
+    <View className="flex-1" style={{ width: '100%', height: '100%', position: 'relative' }}>
       <canvas
         ref={canvasRef}
         style={{
           width: '100%',
           height: '100%',
           display: 'block',
+          backgroundColor: '#0f172a',
         }}
       />
     </View>

@@ -125,3 +125,9 @@
 - [ ] Test wind speed scale bar rendering (requires canvas mocking)
 - [ ] Test particle trail rendering (requires canvas mocking)
 - [x] Verify all tests pass (76 tests passing)
+
+## Bug Fixes - Wind Map
+- [x] Debug canvas not rendering on wind map screen
+- [x] Check web canvas component initialization
+- [x] Verify canvas element is visible and sized correctly
+- [x] Test canvas rendering with sample wind data
