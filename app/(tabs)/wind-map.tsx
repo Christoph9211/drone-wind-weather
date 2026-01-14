@@ -19,10 +19,7 @@ import * as Haptics from 'expo-haptics';
 import { WindMapCanvasWeb } from '@/components/wind-map-canvas-web';
 import { WindMapCanvasNative } from '@/components/wind-map-canvas-native';
 
-const MapCanvas = Platform.select({
-  web: WindMapCanvasWeb,
-  default: WindMapCanvasNative,
-});
+const MapCanvas = Platform.OS === 'web' ? WindMapCanvasWeb : WindMapCanvasNative;
 
 export default function WindMapScreen() {
   const { currentLocation } = useLocation();
@@ -34,6 +31,10 @@ export default function WindMapScreen() {
   const [showDetails, setShowDetails] = useState(true);
   const animationRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastUpdateRef = useRef<number>(Date.now());
+
+  useEffect(() => {
+    console.log('Wind Map - Platform:', Platform.OS, 'Particles:', particles.length);
+  }, [particles]);
 
   useEffect(() => {
     loadWeatherData();
@@ -82,6 +83,7 @@ export default function WindMapScreen() {
       3000
     );
 
+    console.log('Particles initialized:', newParticles.length);
     setParticles(newParticles);
   };
 
@@ -182,7 +184,7 @@ export default function WindMapScreen() {
     <ScreenContainer containerClassName="bg-[#0f172a]">
       <View className="flex-1">
         {/* Map Canvas */}
-        <View className="flex-1 overflow-hidden">
+        <View className="flex-1 overflow-hidden" style={{ width: '100%', height: '100%' }}>
           <MapCanvas
             particles={particles}
             windSpeed={weatherData.current.windSpeed}

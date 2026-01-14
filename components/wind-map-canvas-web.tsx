@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { View } from 'react-native';
+import { View, Platform } from 'react-native';
 import { Particle } from '@/lib/wind-particle-system';
 
 interface WindMapCanvasWebProps {
@@ -109,6 +109,15 @@ export function WindMapCanvasWeb({
       }
     };
   }, [particles, windDirection, windSpeed, windCategory, safeThreshold, cautionThreshold]);
+
+  // Only render on web platform
+  if (Platform.OS !== 'web') {
+    return (
+      <View className="flex-1 items-center justify-center bg-[#0f172a]">
+        <View />
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1" style={{ width: '100%', height: '100%', position: 'relative' }}>

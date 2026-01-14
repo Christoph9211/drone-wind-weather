@@ -127,7 +127,7 @@
 - [x] Verify all tests pass (76 tests passing)
 
 ## Bug Fixes - Wind Map
-- [x] Debug canvas not rendering on wind map screen
-- [x] Check web canvas component initialization
-- [x] Verify canvas element is visible and sized correctly
-- [x] Test canvas rendering with sample wind data
+- [x] Fix canvas not rendering particle animation on wind map
+- [x] Ensure web canvas component is being used instead of native fallback
+- [x] Debug canvas context and drawing functions
+- [x] Verify particles are being passed correctly to canvas component
