@@ -1,4 +1,4 @@
-import { View, Text, ActivityIndicator, Platform, TouchableOpacity } from 'react-native';
+import { View, Text, ActivityIndicator, Platform, TouchableOpacity, LayoutChangeEvent } from 'react-native';
 import { useState, useEffect, useRef } from 'react';
 import { ScreenContainer } from '@/components/screen-container';
 import { useLocation } from '@/lib/location-provider';
@@ -31,6 +31,7 @@ export default function WindMapScreen() {
   const [showDetails, setShowDetails] = useState(true);
   const animationRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastUpdateRef = useRef<number>(Date.now());
+  const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
     console.log('Wind Map - Platform:', Platform.OS, 'Particles:', particles.length);
@@ -58,7 +59,6 @@ export default function WindMapScreen() {
 
       setWeatherData(data);
       setError(null);
-      initializeParticles(data);
     } catch (err) {
       console.error('Error loading weather data:', err);
       setError('Failed to load weather data');
@@ -67,17 +67,19 @@ export default function WindMapScreen() {
     }
   };
 
-  const initializeParticles = (data: WeatherData) => {
+  const initializeParticles = (data: WeatherData, width: number, height: number) => {
+    if (width <= 0 || height <= 0) return;
     const { vx, vy } = windDirectionToVelocity(
       data.current.windDirection,
       data.current.windSpeed / 8
     );
 
+    const radius = Math.min(width, height) * 0.45;
     const newParticles = generateParticles(
       200,
-      512,
-      384,
-      280,
+      width / 2,
+      height / 2,
+      radius,
       vx,
       vy,
       3000
@@ -89,6 +91,14 @@ export default function WindMapScreen() {
 
   useEffect(() => {
     if (!weatherData) return;
+    if (canvasSize.width === 0 || canvasSize.height === 0) return;
+
+    initializeParticles(weatherData, canvasSize.width, canvasSize.height);
+  }, [weatherData, canvasSize.width, canvasSize.height]);
+
+  useEffect(() => {
+    if (!weatherData) return;
+    if (canvasSize.width === 0 || canvasSize.height === 0) return;
 
     const animate = () => {
       const now = Date.now();
@@ -104,11 +114,12 @@ export default function WindMapScreen() {
             weatherData.current.windSpeed / 8
           );
 
+          const radius = Math.min(canvasSize.width, canvasSize.height) * 0.45;
           const newParticles = generateParticles(
             60,
-            512,
-            384,
-            280,
+            canvasSize.width / 2,
+            canvasSize.height / 2,
+            radius,
             vx,
             vy,
             3000
@@ -130,7 +141,15 @@ export default function WindMapScreen() {
         clearTimeout(animationRef.current);
       }
     };
-  }, [weatherData]);
+  }, [weatherData, canvasSize.width, canvasSize.height]);
+
+  const handleCanvasLayout = (event: LayoutChangeEvent) => {
+    const { width, height } = event.nativeEvent.layout;
+    if (width === 0 || height === 0) return;
+    if (width !== canvasSize.width || height !== canvasSize.height) {
+      setCanvasSize({ width, height });
+    }
+  };
 
   const toggleDetails = () => {
     if (Platform.OS !== 'web') {
@@ -184,7 +203,11 @@ export default function WindMapScreen() {
     <ScreenContainer containerClassName="bg-[#0f172a]">
       <View className="flex-1">
         {/* Map Canvas */}
-        <View className="flex-1 overflow-hidden" style={{ width: '100%', height: '100%' }}>
+        <View
+          className="flex-1 overflow-hidden"
+          style={{ width: '100%', height: '100%' }}
+          onLayout={handleCanvasLayout}
+        >
           <MapCanvas
             particles={particles}
             windSpeed={weatherData.current.windSpeed}
