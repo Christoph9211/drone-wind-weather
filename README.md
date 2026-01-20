@@ -1,167 +1,167 @@
 # DroneWind - Weather App for Drone Flyers
 
-A mobile weather app specifically designed for drone pilots, featuring detailed wind speed information, flight condition assessments, and location-based weather data to help make informed flying decisions.
+A cross-platform mobile weather application specifically engineered for drone pilots. It provides critical, real-time wind data, flight condition assessments, and advanced wind-at-altitude calculations to ensure informed and safe flying decisions.
 
-## Features
+## Key Features
 
-### 🌬️ Wind-Focused Weather Data
-- **Large Wind Speed Display**: See current wind speeds at a glance with color-coded indicators
-- **Flight Condition Status**: Automatic assessment of flying conditions (Safe/Caution/Unsafe)
-- **Wind Direction Compass**: Visual compass showing wind direction with degree measurements
-- **Wind Gust Information**: Track wind gusts to anticipate sudden changes
+DroneWind goes beyond standard weather apps by focusing on the unique needs of drone operation:
 
-### 📊 Comprehensive Weather Details
-- Current temperature, humidity, and pressure
-- Hourly forecast for the next 12 hours
-- Sunrise and sunset times
-- Weather conditions and descriptions
+### 🌬️ Real-Time Flight Condition Assessment
+- **Large Wind Speed Display**: Current wind speeds are displayed prominently with a dynamic, color-coded indicator.
+- **Automatic Safety Status**: Provides an instant assessment of flying conditions (Safe, Caution, or Unsafe) based on user-defined wind speed thresholds.
+- **Wind Direction Compass**: A visual compass shows the exact wind direction in degrees and cardinal points.
+- **Wind Gust Tracking**: Monitors wind gusts to help pilots anticipate sudden and dangerous changes in air movement.
 
-### ⚙️ Customizable Settings
-- **Unit Preferences**: Switch between MPH/KPH for wind speed and °F/°C for temperature
-- **Custom Thresholds**: Set your own wind speed limits for safe, caution, and unsafe conditions
-- **Persistent Settings**: All preferences saved locally for quick access
+### 🗺️ Interactive Wind Map Visualization
+A dedicated **Wind Map** tab provides a visual, animated representation of current wind conditions:
+- **Particle System**: Uses a particle animation system to visually simulate the speed and direction of the wind flow.
+- **Dynamic Coloring**: The map's visual elements are color-coded to instantly reflect the safety status (Green, Amber, Red) based on your custom thresholds.
+- **Toggleable Details**: Allows the user to switch between a detailed data overlay and a clean, full-screen visualization.
 
-### 📍 Location Features
-- Automatic location detection (with permission)
-- Manual location search
-- Cached weather data for offline viewing
-- Pull-to-refresh for instant updates
+### 📈 Wind at Altitude Calculation
+A crucial tool for high-altitude drone operations:
+- **Power Law Model**: Estimates wind speed at various altitudes above ground level (AGL) using the meteorological Power Law Model, accounting for surface friction.
+- **Max Safe Altitude**: Calculates and recommends the highest altitude at which wind conditions remain within the user's "Safe" threshold.
+- **Altitude Presets**: Quick-check presets (e.g., 50ft, 100ft, 400ft) provide instant safety analysis for common flying heights.
+
+### ⚙️ Customization and Location
+- **Unit Preferences**: Easily switch between MPH/KPH for wind speed and °F/°C for temperature.
+- **Custom Thresholds**: Pilots can set their own wind speed limits for Safe, Caution, and Unsafe conditions to match their drone's specifications and personal experience level.
+- **Location Services**: Supports automatic location detection and manual location search via geocoding.
 
 ## Tech Stack
 
-- **Framework**: React Native with Expo SDK 54
-- **Language**: TypeScript
-- **Styling**: NativeWind (Tailwind CSS for React Native)
-- **Navigation**: Expo Router with tab navigation
-- **Data Storage**: AsyncStorage for local persistence
-- **Weather API**: OpenWeatherMap API
-- **Location**: Expo Location for GPS and permissions
+DroneWind is built as a modern, cross-platform application using a robust and scalable technology stack:
+
+| Category | Technology | Purpose |
+| :--- | :--- | :--- |
+| **Framework** | React Native (Expo SDK 54) | Cross-platform mobile and web development |
+| **Language** | TypeScript | Type safety and improved developer experience |
+| **Styling** | NativeWind (Tailwind CSS) | Utility-first styling for rapid UI development |
+| **Navigation** | Expo Router | File-system based routing for seamless navigation |
+| **State/Data** | React Query (TanStack) | Data fetching, caching, and state management |
+| **Data Source** | OpenWeatherMap API | Primary source for real-time weather data |
+| **Visualization** | React Native Canvas | Custom particle system for wind map animation |
 
 ## Getting Started
 
+Follow these steps to set up and run the project locally.
+
 ### Prerequisites
 
-1. **OpenWeatherMap API Key**
-   - Visit [OpenWeatherMap](https://openweathermap.org/api)
-   - Sign up for a free account
-   - Get your API key from the dashboard
-   - The free tier includes 1,000 API calls per day
+1.  **OpenWeatherMap API Key**
+    *   Visit [OpenWeatherMap](https://openweathermap.org/api) and sign up for a free account.
+    *   Obtain your API key from the dashboard. The free tier is sufficient for development.
+
+2.  **Node.js and pnpm**
+    *   Ensure you have Node.js (v18+) and the pnpm package manager installed.
 
 ### Installation
 
-1. Clone the repository
-2. Install dependencies:
-   ```bash
-   pnpm install
-   ```
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/Christoph9211/drone-wind-weather.git
+    cd drone-wind-weather
+    ```
 
-3. Set up your API key:
-   - The app will prompt you to enter your OpenWeatherMap API key
-   - Or set it manually in the environment variables as `EXPO_PUBLIC_OPENWEATHER_API_KEY`
+2.  **Install dependencies:**
+    ```bash
+    pnpm install
+    ```
 
-4. Start the development server:
-   ```bash
-   pnpm dev
-   ```
+3.  **Set up your API Key:**
+    The application is configured to prompt for the API key on first run. Alternatively, you can set it manually:
+    *   Create a file named `.env` in the project root.
+    *   Add your key: `EXPO_PUBLIC_OPENWEATHER_API_KEY="YOUR_API_KEY_HERE"`
 
-5. Open the app:
-   - **iOS**: Scan the QR code with the Camera app, then open in Expo Go
-   - **Android**: Scan the QR code with the Expo Go app
-   - **Web**: The app will open automatically in your browser
+4.  **Start the development server:**
+    The project uses a full-stack setup with a tRPC server and a Metro bundler for the client:
+    ```bash
+    pnpm dev
+    ```
 
-## Usage
+5.  **Open the app:**
+    *   **Mobile (iOS/Android)**: Scan the QR code displayed in the terminal with the Expo Go app.
+    *   **Web**: The app will open automatically in your default web browser.
+
+## Usage Guide
 
 ### Home Screen (Weather Dashboard)
 
-The main screen displays all essential weather information for drone flying:
+The main tab provides a summary of all critical flight data:
 
-1. **Wind Speed**: Large, color-coded display showing current wind speed
-   - Green: Safe to fly (default: 0-15 mph)
-   - Amber: Caution advised (default: 15-25 mph)
-   - Red: Unsafe conditions (default: 25+ mph)
+| Element | Description | Safety Indicator |
+| :--- | :--- | :--- |
+| **Wind Speed** | Current speed and unit (MPH/KPH) | Color-coded (Green, Amber, Red) |
+| **Flight Status** | Overall assessment of flying conditions | Text label (Safe, Caution, Unsafe) |
+| **Wind Direction** | Compass reading and degree value | Visual compass |
+| **Hourly Forecast** | Scrollable timeline for the next 12 hours | Helps find the best flying window |
 
-2. **Current Conditions**: Temperature, humidity, pressure, and wind gusts
+**Pro Tip**: Pull down on the screen to refresh the weather data instantly.
 
-3. **Wind Direction**: Visual compass showing wind direction
+### Wind Map Screen
 
-4. **Hourly Forecast**: Scroll through the next 12 hours to find the best flying window
+This screen visualizes the wind:
 
-5. **Sun Times**: Sunrise and sunset times for planning your flights
-
-**Pull down to refresh** weather data at any time.
+*   **Particle Flow**: Observe the speed and direction of the wind through the movement of animated particles. Faster movement indicates higher wind speed.
+*   **Safety Zones**: The color of the particles and the map overlay correspond to the safety thresholds you have set.
 
 ### Settings Screen
 
-Customize the app to your preferences:
+This is where you tailor the app to your needs:
 
-1. **Units**: Toggle between MPH/KPH and °F/°C
-2. **Flight Thresholds**: Adjust wind speed limits for safe, caution, and unsafe conditions
-3. **About**: View app version and data source information
+| Setting | Description | Default Values |
+| :--- | :--- | :--- |
+| **Units** | Toggle between Imperial (MPH, °F) and Metric (KPH, °C) | MPH and °F |
+| **Safe Threshold** | Maximum wind speed for **Safe** flying | 15 MPH (24 KPH) |
+| **Caution Threshold** | Maximum wind speed for **Caution** flying | 25 MPH (40 KPH) |
 
-All settings are saved automatically and persist between app sessions.
+**Note**: Any wind speed above the **Caution Threshold** is automatically considered **Unsafe**.
+
+## Project Structure Highlights
+
+| Path | Description |
+| :--- | :--- |
+| `app/(tabs)/index.tsx` | Main Weather Dashboard screen. |
+| `app/(tabs)/wind-map.tsx` | Interactive Wind Map visualization screen. |
+| `app/(tabs)/settings.tsx` | User settings and threshold configuration. |
+| `components/altitude-wind-card.tsx` | Component for the Wind at Altitude calculation and display. |
+| `lib/wind-particle-system.ts` | Core logic for the animated wind particle visualization. |
+| `lib/altitude-wind-calculator.ts` | Implementation of the Power Law Model for wind-at-altitude estimation. |
+| `services/weather.ts` | Service layer for fetching and processing OpenWeatherMap data. |
+| `server/` | Full-stack tRPC server setup (currently focused on client-side data fetching). |
 
 ## Default Wind Speed Thresholds
 
-The app comes with sensible defaults based on common drone flying guidelines:
+The app uses the following sensible defaults, which can be adjusted in the Settings:
 
-- **Safe**: 0-15 mph (0-24 kph) - Ideal conditions for most drones
-- **Caution**: 15-25 mph (24-40 kph) - Experienced pilots only, smaller drones may struggle
-- **Unsafe**: 25+ mph (40+ kph) - Not recommended for recreational flying
-
-You can adjust these thresholds in the Settings screen to match your drone's capabilities and your experience level.
-
-## Project Structure
-
-```
-app/
-  (tabs)/
-    index.tsx        ← Home screen (Weather Dashboard)
-    settings.tsx     ← Settings screen
-services/
-  weather.ts         ← Weather API service
-types/
-  weather.ts         ← TypeScript types for weather data
-lib/
-  weather-utils.ts   ← Utility functions for weather calculations
-  settings-provider.tsx ← Settings context and state management
-components/
-  screen-container.tsx ← SafeArea wrapper component
-  ui/
-    icon-symbol.tsx  ← Icon mappings for tab bar
-```
-
-## API Usage
-
-The app uses the OpenWeatherMap API to fetch:
-- Current weather conditions
-- 5-day forecast (displaying next 12 hours)
-- Geocoding for location search
-
-**Free tier limits**: 1,000 calls per day (more than sufficient for personal use)
+| Status | Wind Speed (MPH) | Wind Speed (KPH) | Recommendation |
+| :--- | :--- | :--- | :--- |
+| **Safe** | 0 - 15 mph | 0 - 24 kph | Ideal conditions for most drones and pilots. |
+| **Caution** | 15 - 25 mph | 24 - 40 kph | Experienced pilots only; smaller or lighter drones may struggle. |
+| **Unsafe** | 25+ mph | 40+ kph | Not recommended for recreational or commercial flying. |
 
 ## Privacy & Data
 
-- **No user accounts required**: All data is stored locally on your device
-- **Location permissions**: Optional, but recommended for automatic weather updates
-- **No data collection**: Your location and preferences never leave your device
-- **Offline support**: Cached weather data available when offline
+*   **Local Storage**: All user preferences and settings are stored locally on your device using AsyncStorage.
+*   **No User Accounts**: The app does not require any sign-up or login.
+*   **Location**: Location permissions are optional and only used to fetch weather data for your current position. No location data is collected or transmitted externally.
 
 ## Contributing
 
-This app was built with drone pilots in mind. If you have suggestions for improvements or additional features, feel free to contribute!
+We welcome contributions from the community! If you have suggestions for new features, bug fixes, or improvements, please feel free to open an issue or submit a pull request.
 
 ## License
 
-MIT License - feel free to use and modify for your own projects.
+This project is licensed under the **MIT License**.
 
 ## Acknowledgments
 
-- Weather data provided by [OpenWeatherMap](https://openweathermap.org/)
-- Built with [Expo](https://expo.dev/) and [React Native](https://reactnative.dev/)
-- Icons from [Material Icons](https://fonts.google.com/icons)
+- Weather data provided by [OpenWeatherMap](https://openweathermap.org/).
+- Built with [Expo](https://expo.dev/) and [React Native](https://reactnative.dev/).
 
 ---
 
-**Happy Flying! 🚁**
+**Fly Safe! 🚁**
 
-Remember: Always check local regulations and weather conditions before flying your drone. This app is a tool to assist your decision-making, but you are responsible for safe flying practices.
+*Disclaimer: This application is a tool to assist your decision-making. Always check local regulations, perform pre-flight checks, and use your best judgment before operating a drone.*
